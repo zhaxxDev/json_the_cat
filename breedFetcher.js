@@ -1,18 +1,23 @@
 const request = require('request');
 
-let rqBreed = process.argv[2];
+const fetchBreedDescription = function (breedName, callback) {
+  const url = `https://api.thecatapi.com/v1/breeds/search?q=${breedName}`;
+  request(url, (error, response, body) => {
+    if (error) {
+      callback(`Failed to request details: ${error}`, null);
+      return;
+    }
+    const data = JSON.parse(body);
+    const breedObj = data[0];
 
-request(`https://api.thecatapi.com/v1/breeds/search?q=${rqBreed}`, (error, response, body) => {
-  console.log('Invalid argument:', error); // Print the error if one occurred
-  console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was receive
+    if (breedObj) {
+      callback(null, breedObj.description);
+    } else {
+      callback(`Failed to find breed ${breedName}`, null);
+    }
 
-  const data = JSON.parse(body);
-  const breed = data[0];
+  });
 
-  if (breed) {
-    console.log(data);
-  } else {
-    console.log(`Failed to find breed ${rqBreed}`);
-  }
+};
 
-});
+module.exports = { fetchBreedDescription };
